@@ -1,0 +1,70 @@
+
+const mineflayer = require('mineflayer');
+
+função criarBot() {
+    const bot = mineflayer.createBot({
+        host: 'pcworld.progamer.me', // <--- REEMPLAZA ESTO POR LA IP DE TU SERVER
+        porta:19132, // Porto predeterminado de Minecraft
+        nome de usuário: 'ADM1', // Nome genérico do bot/NPC dentro do jogo
+        version: false // Detecta automaticamente a versão exata do servidor (1.8 a 1.21+)
+    });
+
+    bot.on('spawn', () => {
+        console.log(`[NPC] O bot apareceu corretamente no mapa.`);
+        // Se seu servidor No-Premium requer senha, descomenta a linha abaixo:
+        // setTimeout(() => bot.chat('/login erickJKN'), 4000);
+    });
+
+    bot.on('login', () => {
+        console.log(`[NPC] Conexão estabelecida com o servidor do Minecraft.`);
+    });
+
+    // Rutina automática do NPC: Buscar cofre, interagir, fechar e saltar (Cada 45 segundos)
+    setInterval(async () => {
+        se (!bot || !bot.entity) retorne;
+
+        tentar {
+            // 1. Localizar o bloco de cofre em um rádio de 5 blocos
+            const chestBlock = bot.findBlock({
+                correspondência: bot.registry.blocksByName.chest.id,
+                distância máxima: 5
+            });
+
+            se (bloco de peito) {
+                console.log('[NPC] Interagindo com o conteúdo próximo...');
+                
+                // 2. Abrir o conteúdo (gerar animação e som físico no servidor)
+                const chest = await bot.openChest(chestBlock);
+                console.log('[NPC] Contenedor aberto.');
+                
+                // Mantém a interface aberta durante 2 segundos simulando atividade de inventário
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // 3. Fechar a interface do contêiner
+                peito.fechar();
+                console.log('[NPC] Contenedor cerrado.');
+            } outro {
+                console.log('[NPC] Aviso: Não foi detectado nenhum conteúdo válido próximo.');
+            }
+
+            // 4. Executar ação de salto físico para evitar a inatividade (Anti-AFK)
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            bot.setControlState('jump', true);
+            setTimeout(() => bot.setControlState('jump', false), 500);
+            console.log('[NPC] Ação anti-inatividade completada com sucesso.');
+
+        } catch (erro) {
+            console.log(`[NPC] Erro no ciclo de execução: ${err.message}`);
+        }
+    }, 45000);
+
+    // Sistema de auto-reconexão segura após expulsões ou reinícios do servidor
+    bot.on('end', (reason) => {
+        console.log(`[NPC] Conexão finalizada por: ${reason}. Reintentando em 25 segundos...`);
+        setTimeout(createBot, 25000);
+    });
+
+    bot.on('error', (err) => console.log(`[NPC] Erro crítico de rede detectado: ${err}`));
+}
+
+criarBot();
